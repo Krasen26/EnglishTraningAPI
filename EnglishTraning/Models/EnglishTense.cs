@@ -17,6 +17,8 @@ namespace EnglishTraning.Models
 
         public int TensesType { get; set; }
 
+        public int SentenceType { get; set; }
+
         public bool IsDeleted { get; set; }
     }
 }

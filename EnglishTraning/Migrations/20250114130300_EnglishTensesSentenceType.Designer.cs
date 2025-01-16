@@ -3,6 +3,7 @@ using EnglishTraning.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace EnglishTraning.Migrations
 {
     [DbContext(typeof(EnglishTraningContext))]
-    partial class EnglishTraningContextModelSnapshot : ModelSnapshot
+    [Migration("20250114130300_EnglishTensesSentenceType")]
+    partial class EnglishTensesSentenceType
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

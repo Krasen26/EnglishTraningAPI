@@ -17,7 +17,7 @@ namespace EnglishTraning.Controllers
             _context = context;
         }
 
-        [HttpGet()]
+        [HttpGet]
         public EnglishTenesesModel GetEnglishTenses()
         {
             EnglishTenesesModel model = new EnglishTenesesModel();  
@@ -37,10 +37,59 @@ namespace EnglishTraning.Controllers
                 model.EnglishTenesesItems.Add(EnglishTenesesItem);
             }
 
+            model.TensesDropDown = GetTensesDropDown();
+
+            model.SentenceTypeDropDown = GetSentenceTypeDropDown();
+
             return model;   
         }
+        [HttpGet]
+        public UploadModel GetUploadData()
+        {
+            UploadModel model = new UploadModel();
 
+            model.TensesDropDown = GetTensesDropDown();
 
+            model.SentenceTypeDropDown = GetSentenceTypeDropDown();
+
+            return model;
+        }
+
+        public static TensesDropDown GetTensesDropDown()
+        {
+            TensesDropDown tensesDropDown = new TensesDropDown();
+
+            List<DropDownItem> list = new List<DropDownItem>
+            {
+                new DropDownItem { Id = 0, Name = "All"},
+                new DropDownItem { Id = 1, Name = "Present Simple"},
+                new DropDownItem { Id = 2, Name = "Present Continuous"},
+                new DropDownItem { Id = 3, Name = "Present Perfect Simple"},
+                new DropDownItem { Id = 4, Name = "Past Simple"},
+                new DropDownItem { Id = 5, Name = "Future Simple"},
+            };
+
+            tensesDropDown.TensesItems.AddRange(list);
+
+            return tensesDropDown;
+        }
+
+        public static SentenceTypeDropDown GetSentenceTypeDropDown()
+        {
+            SentenceTypeDropDown sentenceTypeDropDown = new SentenceTypeDropDown();
+
+            List<DropDownItem> list = new List<DropDownItem>
+            {
+                 new DropDownItem { Id = 0, Name = "All"},
+                 new DropDownItem { Id = 1, Name = "Утвърдителни изречения (Affirmative Sentences)"},
+                 new DropDownItem { Id = 2, Name = "Отрицателни изречения (Negative Sentences)"},
+                 new DropDownItem { Id = 3, Name = "Въпросителни изречения (Interrogative Sentences)"},
+            };
+
+            sentenceTypeDropDown.SentenceTypes.AddRange(list);
+
+            return sentenceTypeDropDown;
+        }
 
         //// GET: api/<EnglishTensesController>
         //[HttpGet]
