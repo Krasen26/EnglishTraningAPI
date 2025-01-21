@@ -2,6 +2,8 @@
 using EnglishTraning.DTO;
 using EnglishTraning.Models;
 using Microsoft.AspNetCore.Mvc;
+using System.Formats.Asn1;
+using System.Globalization;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -43,6 +45,8 @@ namespace EnglishTraning.Controllers
 
             return model;   
         }
+
+
         [HttpGet]
         public UploadModel GetUploadData()
         {
@@ -50,7 +54,11 @@ namespace EnglishTraning.Controllers
 
             model.TensesDropDown = GetTensesDropDown();
 
+            model.TensesDropDown.TensesItems = model.TensesDropDown.TensesItems.Where(x=>x.Id > 0).ToList();
+
             model.SentenceTypeDropDown = GetSentenceTypeDropDown();
+
+            model.SentenceTypeDropDown.SentenceTypes = model.SentenceTypeDropDown.SentenceTypes.Where(x => x.Id > 0).ToList();
 
             return model;
         }
@@ -91,36 +99,86 @@ namespace EnglishTraning.Controllers
             return sentenceTypeDropDown;
         }
 
-        //// GET: api/<EnglishTensesController>
-        //[HttpGet]
-        //public IEnumerable<string> Get()
-        //{
-        //    return new string[] { "value1", "value2" };
-        //}
+        [HttpPost("{id}/{tensesType}/{sentenceType}")]
+        public IActionResult UploadCsv(int id, int tensesType, int sentenceType)
+         {
+            UploadDataResult uploadDataResult = new UploadDataResult();
 
-        //// GET api/<EnglishTensesController>/5
-        //[HttpGet("{id}")]
-        //public string Get(int id)
-        //{
-        //    return "value";
-        //}
+            try
+            {
+                List<EnglishTense> items = new List<EnglishTense>(); 
 
-        //// POST api/<EnglishTensesController>
-        //[HttpPost]
-        //public void Post([FromBody] string value)
-        //{
-        //}
+                if (Request.Form.Files.Count > 0)
+                {
+                    var file = Request.Form.Files[0];
 
-        //// PUT api/<EnglishTensesController>/5
-        //[HttpPut("{id}")]
-        //public void Put(int id, [FromBody] string value)
-        //{
-        //}
+                    // Провери дали файлът не е празен
+                    if (file.Length > 0)
+                    {
+                        using (var stream = new StreamReader(file.OpenReadStream()))
+                        {
+                            string line;
 
-        //// DELETE api/<EnglishTensesController>/5
-        //[HttpDelete("{id}")]
-        //public void Delete(int id)
-        //{
-        //}
+                            List<string[]> csvData = new List<string[]>();
+
+                            // Чети редовете от CSV файла
+                            while ((line = stream.ReadLine()) != null)
+                            {
+                                // Разделяне на колоните (пример: ако са разделени със запетая)
+                                var columns = line.Split(',');
+
+                                if (columns.Length == 4)
+                                {
+                                    // Добави редовете в списъка
+                                    EnglishTense item = new EnglishTense();
+
+                                    item.BulgarianSentence = columns[0];
+
+                                    item.EnglishSentence = columns[1];
+
+                                    int type = 0;
+                                    int.TryParse(columns[2], out type);
+                                    item.TensesType = type;
+
+                                    int sType = 0;
+                                    int.TryParse(columns[3], out sType);
+                                    item.SentenceType = sType;
+
+                                    EnglishTense? englishTense = _context.EnglishTenses.Where(x => x.BulgarianSentence.Equals(item.BulgarianSentence) && x.EnglishSentence.Equals(item.EnglishSentence)).FirstOrDefault();
+
+                                    if (englishTense == null && item.TensesType > 0 && item.SentenceType > 0)
+                                    {
+                                        items.Add(item);
+                                    }
+                                }
+                            }
+
+                            if (items.Count > 0)
+                            {
+                                _context.AddRange(items);   
+
+                                _context.SaveChanges();
+                            }
+
+                           uploadDataResult.SuccessMessage = $"{csvData.Count} rows uploaded successfully.";
+                        }
+                    }
+                    else
+                    {
+                        uploadDataResult.ErrorMessage = "Uploaded file is empty.";
+                    }
+                }
+                else
+                {
+                   uploadDataResult.ErrorMessage = "No file was uploaded.";
+                }
+
+                return Ok(uploadDataResult);
+            }
+            catch (Exception ex)
+            {
+                return new BadRequestObjectResult(ex.Message);
+            }
+        }
     }
 }

@@ -9,5 +9,7 @@
         public string EnglishSentence { get; set; }
 
         public int TensesType { get; set; }
+
+        public int SentenceType { get; set; }
     }
 }
