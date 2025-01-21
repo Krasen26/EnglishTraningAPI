@@ -24,7 +24,7 @@ namespace EnglishTraning.Controllers
         {
             EnglishTenesesModel model = new EnglishTenesesModel();  
 
-            List<EnglishTense> englishTenses = _context.EnglishTenses.ToList();
+            List<EnglishTense> englishTenses = _context.EnglishTenses.Where(x=>x.IsDeleted == false).ToList();
 
             foreach (var item in englishTenses)
             {
@@ -62,6 +62,90 @@ namespace EnglishTraning.Controllers
 
             return model;
         }
+
+        [HttpPost]
+        public EnglishTenesesResult Edit(EnglishTenesesItem item)
+        {
+            EnglishTenesesResult result = new EnglishTenesesResult();
+
+            try
+            {
+                EnglishTense? englishTense = _context.EnglishTenses.Where(x => x.Id == item.Id).FirstOrDefault();
+
+                if (englishTense != null)
+                {
+                    englishTense.EnglishSentence = item.EnglishSentence;
+
+                    englishTense.BulgarianSentence = item.BulgarianSentence;
+
+                    _context.SaveChanges();
+
+                    result.SuccessMessage = "The item was changed successfully.";
+                }
+            }
+            catch (Exception ex)
+            {
+                result.ErrorMessage = ex.Message;
+            }
+
+            return result;  
+        }
+
+        [HttpPost]
+        public EnglishTenesesResult Delete(EnglishTenesesItem item)
+        {
+            EnglishTenesesResult result = new EnglishTenesesResult();
+
+            result.Id = item.Id;
+
+            try
+            {
+                EnglishTense? englishTense = _context.EnglishTenses.Where(x => x.Id == item.Id).FirstOrDefault();
+
+                if (englishTense != null)
+                {
+                    englishTense.IsDeleted = true;
+
+                    _context.SaveChanges();
+
+                    result.SuccessMessage = "The item was deleted successfully.";
+
+                   
+                }
+            }
+            catch (Exception ex)
+            {
+                result.ErrorMessage = ex.Message;
+            }
+
+            return result;
+        }
+
+        //[HttpPost]
+        //public EnglishTenesesResult DeleteAll(EnglishTenesesItem item)
+        //{
+        //    EnglishTenesesResult result = new EnglishTenesesResult();
+
+        //    try
+        //    {
+        //        EnglishTense? englishTense = _context.EnglishTenses.Where(x => x.Id == item.Id).FirstOrDefault();
+
+        //        if (englishTense != null)
+        //        {
+        //            englishTense.IsDeleted = true;
+
+        //            _context.SaveChanges();
+
+        //            result.SuccessMessage = "The item was deleted successfully.";
+        //        }
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        result.ErrorMessage = ex.Message;
+        //    }
+
+        //    return result;
+        //}
 
         public static TensesDropDown GetTensesDropDown()
         {
